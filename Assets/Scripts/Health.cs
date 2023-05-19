@@ -23,7 +23,7 @@ public class Health : MonoBehaviour
     {
         enemyMovement = other.GetComponent<EnemyMovement>();
         DamageDealer damageDealer = other.GetComponent<DamageDealer>();
-        if (damageDealer != null)
+        if (damageDealer != null && other.tag == "Bullet")
         {
             
             TakeDamage(damageDealer.GetDamage());

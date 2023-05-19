@@ -45,8 +45,10 @@ public class EnemyMovement : MonoBehaviour
     {
         distance = Vector2.Distance(transform.position, player.transform.position);
         IsMoving();
+        Debug.Log(isAlive);
         if (distance < 5 && isAlive)
         {
+            Debug.Log("Anything");
             Attackkkkkk();
             FollowPlayer();
             // Debug.Log("Following Player");
@@ -64,7 +66,7 @@ public class EnemyMovement : MonoBehaviour
         //     return;
         // }
         DamageDealer damageDealer = GetComponent<DamageDealer>();
-        if (distance < fireDistance && firingCoroutine == null)
+        if (distance < fireDistance && firingCoroutine == null && isAlive)
         {
 
             firingCoroutine = StartCoroutine(WaitBetweenAttacks());
@@ -72,22 +74,29 @@ public class EnemyMovement : MonoBehaviour
         else if (distance > fireDistance && firingCoroutine != null)
         {
             StopCoroutine(firingCoroutine);
-            
+            firingCoroutine = null;
+        }
+        if (!isAlive)
+        {
+            StopCoroutine(firingCoroutine);
             firingCoroutine = null;
         }
     }
 
     IEnumerator WaitBetweenAttacks()
     {
-        while (true)
+        while (isAlive)
         {
-            Instantiate(bullet, gun.position, transform.rotation);
-            // Debug.Log("Instantiated");
+            Instantiate(bullet, this.transform);
+            // Debug.Log("this transform: " + this.transform);
             // myHealth.TakeDamage(damageDealer.Getmage());
             myAnimator.SetBool("isAttacking", true);
             myAnimator.SetBool("isAttacking", false);
+
+
             yield return new WaitForSeconds(fireRate);
-            
+            yield return new WaitForEndOfFrame();
+
         }
 
     }
@@ -150,12 +159,17 @@ public class EnemyMovement : MonoBehaviour
     }
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag == "Bite" && myHealth.GetHealth() < Mathf.Epsilon && distance < 2)
+        if (other.tag == "Bite" && distance < 2)
         {
-            isAlive = false;
-            myAnimator.SetTrigger("isDead");
-            Destroy(myBodyCollider);
-            Destroy(myFootCollider);
+
+
+            if (myHealth.GetHealth() < Mathf.Epsilon)
+            {
+                isAlive = false;
+                myAnimator.SetTrigger("isDead");
+                Destroy(myBodyCollider);
+                Destroy(myFootCollider);
+            }
         }
         if (other.tag == "Ground" && gameObject.name == "EnemyBoxCollider")
         {
@@ -180,6 +194,14 @@ public class EnemyMovement : MonoBehaviour
 
         // StartCoroutine(MoveBack());
         // Debug.Log("Moved back");
+    }
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        if (myBodyCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+        {
+            Debug.Log("Collided");
+        }
+
     }
 
     // IEnumerator MoveBack()

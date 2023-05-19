@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Cinemachine;
 public class Player : MonoBehaviour
 {
     [SerializeField] float runSpeed = 10f;
@@ -18,13 +19,19 @@ public class Player : MonoBehaviour
     GameObject child;
     Health health;
     EnemyMovement enemyMovement;
+    Tutorial tutorial;
+    [SerializeField] CinemachineVirtualCamera followCamera;
+    GameObject tutoriaImage;
     float distance;
     bool isAlive = true;
     bool isEnemy;
     bool canMove = true;
+    bool endedTutorial = false;
     void Start()
     {
         child = transform.Find("PlayerColliders").gameObject;
+        tutoriaImage = GameObject.FindWithTag("TutorialImage");
+        tutorial = FindObjectOfType<Tutorial>();
         myRigidbody = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
         health = GetComponent<Health>();
@@ -54,7 +61,12 @@ public class Player : MonoBehaviour
             TouchingGrass();
             Die();
         }
-        
+        if (endedTutorial)
+        {
+            Vector2 velocity = new Vector2(2, myRigidbody.velocity.y);
+            Debug.Log(velocity);
+            myRigidbody.velocity = velocity;
+        }
     }
     void DisableControls()
     {
@@ -83,6 +95,7 @@ public class Player : MonoBehaviour
 
     void OnMove(InputValue value)
     {
+        tutorial.hasMoved = true;
         if (!isAlive)
         {
             return;
@@ -98,6 +111,7 @@ public class Player : MonoBehaviour
     }
     void OnJump(InputValue value)
     {
+        tutorial.hasJumped = true;
         if (!isAlive)
         {
             return;
@@ -110,10 +124,10 @@ public class Player : MonoBehaviour
         }
         if (value.isPressed)
         {
-            
+
             myRigidbody.velocity += new Vector2(0f, jumpSpeed);
         }
-        
+
     }
     void TouchingGrass()
     {
@@ -122,7 +136,7 @@ public class Player : MonoBehaviour
         {
             myAnimator.SetBool("isJumping", true);
         }
-         
+
         if (myFeetCollider.IsTouchingLayers(LayerMask.GetMask("Ground", "Bouncer")))
         {
             myAnimator.SetBool("isJumping", false);
@@ -135,6 +149,7 @@ public class Player : MonoBehaviour
     }
     void OnFire()
     {
+        tutorial.hasAttacked = true;
         if (!isAlive)
         {
             return;
@@ -148,7 +163,7 @@ public class Player : MonoBehaviour
         //     damageDealer.Hit();
         // }
         StartCoroutine(EndAnim());
-        
+
     }
 
     IEnumerator EndAnim()
@@ -157,5 +172,18 @@ public class Player : MonoBehaviour
         myAnimator.SetBool("IsAttacking", false);
         // Debug.Log("Ending Animation");
     }
-    
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag == "EnterTrigger")
+        {
+            DisableControls();
+            followCamera.m_Follow = null;
+            Debug.Log("No Follow Camera");
+            endedTutorial = true;
+        }
+        if (other.tag == "End Trigger")
+        {
+            tutoriaImage.Image.Color()
+        }
+    }
 }

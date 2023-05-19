@@ -12,6 +12,10 @@ TagManager:
   - EnemyBodyCollider
   - PlayerColliders
   - Gun
+  - Bullet
+  - EnterTrigger
+  - End Trigger
+  - TutorialImages
   layers:
   - Default
   - TransparentFX

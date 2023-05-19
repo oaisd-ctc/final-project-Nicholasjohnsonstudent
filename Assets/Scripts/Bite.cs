@@ -36,6 +36,7 @@ public class Bite : MonoBehaviour
         
         if (other.tag == "Enemy")
         {
+            Debug.Log("Tag: " + other);
             // enemyChild = other.transform.Find("EnemyBoxCollider").gameObject;
             DamageDealer damageDealer = this.GetComponent<DamageDealer>();
             health = other.GetComponent<Health>();
